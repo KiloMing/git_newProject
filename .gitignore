@@ -1,0 +1,38 @@
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Temporary and cache files
+*.tmp
+*.temp
+*.swp
+*.swo
+.cache/
+tmp/
+temp/
+
+# Editor settings
+.idea/
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Test and coverage output
+coverage/
+.coverage
+.pytest_cache/
+
+# Common dependency and build output
+node_modules/
+dist/
+build/
+__pycache__/
+*.py[cod]
