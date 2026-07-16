@@ -545,6 +545,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\BSP\DMA\dma_1.c</FilePath>
             </File>
+            <File>
+              <FileName>lcd_function.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\LCD_FUNCTION\lcd_function.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -1,31 +1,13 @@
 /**
  ****************************************************************************************************
  * @file        lcd.c
- * @author      正点原子团队(ALIENTEK)
+ * @author      KiloMing
  * @version     V1.1
  * @date        2022-09-06
  * @brief       2.8寸/3.5寸/4.3寸/7寸 TFTLCD(MCU屏) 驱动代码
  *              支持驱动IC型号包括:ILI9341/NT35310/NT35510/SSD1963/ST7789/ST7796/ILI9806等
- *
- * @license     Copyright (c) 2020-2032, 广州市星翼电子科技有限公司
- ****************************************************************************************************
- * @attention
- *
- * 实验平台:正点原子 阿波罗 H743开发板
- * 在线视频:www.yuanzige.com
- * 技术论坛:www.openedv.com
- * 公司网址:www.alientek.com
- * 购买地址:openedv.taobao.com
- *
- * 修改说明
- * V1.0 20220906
- * 第一次发布
- * V1.1 20230607
- * 新增对ST7796和ILI9806 IC支持
- *
- ****************************************************************************************************
+ * ****************************************************************************************************
  */
-
 #include "stdlib.h"
 #include "./BSP/LCD/lcd.h"
 #include "./BSP/LCD/lcdfont.h"
@@ -1311,6 +1293,7 @@ void lcd_show_xnum(uint16_t x, uint16_t y, uint32_t num, uint8_t len, uint8_t si
  * @param       width,height: 区域大小
  * @param       size        : 选择字体 12/16/24/32
  * @param       p           : 字符串首地址
+ * @param       color       : 颜色选择
  * @retval      无
  */
 void lcd_show_string(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t size, char *p, uint16_t color)

@@ -25,28 +25,29 @@
 #include "./BSP/LCD/lcd.h"
 #include "./BSP/ADC/adc_1.h"
 #include "./BSP/MPU/mpu.h"
-
+#include "./BSP/LCD_FUNCTION/lcd_function.h"
 
 int main(void)
 {
 
-    //sys_cache_enable();                                 /* 打开L1-Cache */
+    sys_cache_enable();                                 /* 打开L1-Cache */
     HAL_Init();                                         /* 初始化HAL库 */
     sys_stm32_clock_init(160, 5, 2, 4);                 /* 设置时钟, 400Mhz */
     delay_init(400);                                    /* 延时初始化 */
     usart_init(115200);                                 /* 串口初始化 */
-   // mpu_memory_protection();                            /* 保护相关存储区域 */
-    led_init();                                         /* 初始化LED */
-    lcd_init();                                         /* 初始化LCD */
-    //uint16_t value = 0;
-    adc_1_init();
-    lcd_clear(WHITE);
-    adc_dma_1_start();
+    //mpu_memory_protection();                            /* 保护相关存储区域 */
+    lcd_function_init(1, WHITE);
+    SENSOR_VALUE test_value = {0};
+    sensor_value_init(&test_value);
+
+    
     while (1)
     {
-        
-        adc_1_lcd_voltage_dma();
-        LED0_TOGGLE();     /* 红灯闪烁 */
-        delay_ms(50);
+        lcd_function_UI(test_value);
+        test_value.CO_value++;
+        test_value.H2S_value += 2.0f;
+        test_value.NH3_value += 5.0f;
+        delay_ms(200);
     }
 }
+
