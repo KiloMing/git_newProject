@@ -36,3 +36,9 @@ dist/
 build/
 __pycache__/
 *.py[cod]
+
+# STM32 / Keil build output and per-user settings
+Output/
+Objects/
+Listings/
+*.uvguix.*
