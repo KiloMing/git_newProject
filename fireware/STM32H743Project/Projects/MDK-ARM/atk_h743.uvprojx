@@ -550,6 +550,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\BSP\LCD_FUNCTION\lcd_function.c</FilePath>
             </File>
+            <File>
+              <FileName>sdram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\SDRAM\sdram.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
