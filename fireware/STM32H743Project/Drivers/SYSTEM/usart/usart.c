@@ -27,6 +27,8 @@
 
 #include "./SYSTEM/sys/sys.h"
 #include "./SYSTEM/usart/usart.h"
+#include "./BSP/DMA/dma_1.h"
+#include <string.h>
 
 
 /* 如果使用os,则包括下面的头文件即可. */
@@ -123,9 +125,7 @@ void usart_init(uint32_t baudrate)
     g_uart1_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;   /* 无硬件流控 */
     g_uart1_handle.Init.Mode = UART_MODE_TX_RX;            /* 收发模式 */
     HAL_UART_Init(&g_uart1_handle);                        /* HAL_UART_Init()会使能UART1 */
-    
-    /* 该函数会开启接收中断：标志位UART_IT_RXNE，并且设置接收缓冲以及接收缓冲接收最大数据量 */
-    HAL_UART_Receive_IT(&g_uart1_handle, (uint8_t *)g_rx_buffer, RXBUFFERSIZE);
+    dma_uart_rx_init();                                    /* 初始化USART1 RX DMA */
 }
 
 /**
@@ -205,6 +205,52 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 
+
+
+
+ALIGN_32BYTES(uint8_t g_uart1_rx_dma_buffer[UART1_RX_DMA_BUFFER_SIZE]);
+
+uint8_t g_uart1_rx_frame[UART1_RX_DMA_BUFFER_SIZE + 1U];
+/* 本次接收的长度 */
+volatile uint16_t g_uart1_rx_length = 0;
+/* 接收完成标志位 */
+volatile uint8_t g_uart1_rx_ready = 0;
+/* */
+/**
+ * @brief DMA receives bytes of any length
+ * @param void
+ */
+
+
+HAL_StatusTypeDef dma_uart_receice_data(void)
+{
+    HAL_StatusTypeDef status;
+
+    SCB_InvalidateDCache_by_Addr(
+        (void *)g_uart1_rx_dma_buffer,
+        UART1_RX_DMA_BUFFER_SIZE
+    );
+
+    status = HAL_UARTEx_ReceiveToIdle_DMA(
+        &g_uart1_handle,
+        g_uart1_rx_dma_buffer,
+        UART1_RX_DMA_BUFFER_SIZE
+    );
+
+    if(status == HAL_OK)
+    {
+        /**
+         * ReceiveToIdle DMA maybe have these cases:
+         * HT: half transmission
+         * TC: complete transmission
+         * IDLE: idle event
+         */
+
+        __HAL_DMA_DISABLE_IT(g_uart1_handle.hdmarx, DMA_IT_HT);
+    }
+    return status;
+}
+
 /**
  * @brief       串口1中断服务函数
  * @param       无
@@ -221,6 +267,24 @@ void USART_UX_IRQHandler(void)
 #if SYS_SUPPORT_OS                      /* 使用OS */
     OSIntExit();
 #endif
+
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size){
+    if(huart->Instance == USART_UX){
+        if((size > 0U) && (size <= UART1_RX_DMA_BUFFER_SIZE)){
+            SCB_InvalidateDCache_by_Addr(
+                (void *)g_uart1_rx_dma_buffer,
+                UART1_RX_DMA_BUFFER_SIZE
+            );
+            memcpy(g_uart1_rx_frame,g_uart1_rx_dma_buffer,size);
+            g_uart1_rx_frame[size] = '\0';
+            g_uart1_rx_length = size;
+            g_uart1_rx_ready = 1U;
+        }
+        dma_uart_receice_data();
+    }
+
 
 }
 

@@ -54,16 +54,24 @@
 #define USART_EN_RX     1                       /* 使能（1）/禁止（0）串口1接收 */
 #define RXBUFFERSIZE    1                       /* 缓存大小 */
 
-extern UART_HandleTypeDef g_uart1_handle;       /* UART句柄 */
+#define UART1_RX_DMA_BUFFER_SIZE    256U        /* DMA Buffer MAX*/
 
+extern UART_HandleTypeDef g_uart1_handle;       /* UART句柄 */
+/* 本次接收的长度 */
+extern volatile uint16_t g_uart1_rx_length;
+/* 接收完成标志位 */
+extern volatile uint8_t g_uart1_rx_ready;
 extern uint8_t  g_usart_rx_buf[USART_REC_LEN];  /* 接收缓冲,最大USART_REC_LEN个字节.末字节为换行符 */
 extern uint16_t g_usart_rx_sta;                 /* 接收状态标记 */
 extern uint8_t g_rx_buffer[RXBUFFERSIZE];       /* HAL库USART接收Buffer */
 
+
+extern uint8_t g_uart1_rx_dma_buffer[UART1_RX_DMA_BUFFER_SIZE]; /* DMA接收缓冲区*/
+extern uint8_t g_uart1_rx_frame[UART1_RX_DMA_BUFFER_SIZE + 1U]; /* 数据读取区，额外一字节用于字符串结束符 */
 /*******************************************************************************************************/
 
 void usart_init(uint32_t baudrate);             /* 串口初始化函数 */
-
+HAL_StatusTypeDef dma_uart_receice_data(void);
 #endif
 
 

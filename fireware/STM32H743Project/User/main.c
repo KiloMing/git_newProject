@@ -42,36 +42,22 @@ int main(void)
     // SENSOR_VALUE test_value = {0};
     // sensor_value_init(&test_value);
 
-    uint8_t hour, min, sec, ampm;
-    uint8_t year, month, date, week;
-    uint8_t tbuf[40];
-    uint8_t t = 0;
-    rtc_init();
+    // uint8_t hour, min, sec, ampm;
+    // uint8_t year, month, date, week;
+    // uint8_t tbuf[40];
+    // uint8_t t = 0;
+    // rtc_init();
     
-    rtc_set_date(2026-48, 7, 22, 3);
-    rtc_set_time(7,0,0);
+    // rtc_set_date(2026-48, 7, 22, 3);
+    // rtc_set_time(7,0,0);
+    // printf("wew\r\n");
+    // dma_uart_receice_data();
+
+    adc_single_sample_dma_init();
 
     while (1)
     {
-        // lcd_function_UI(test_value);
-        // test_value.CO_value++;
-        // test_value.H2S_value += 2.0f;
-        // test_value.NH3_value += 5.0f;
-        // delay_ms(200);
-
-        t++;
-
-        if ((t % 10) == 0)            /* 每100ms更新一次显示数据 */
-        {
-            rtc_get_time(&hour, &min, &sec, &ampm);
-            sprintf((char *)tbuf, "Time:%02d:%02d:%02d", hour, min, sec);
-            lcd_show_string(30, 130, 210, 16, 16, (char *)tbuf, RED);
-            rtc_get_date(&year, &month, &date, &week);
-            sprintf((char *)tbuf, "Date:20%02d-%02d-%02d", year, month, date);
-            lcd_show_string(30, 150, 210, 16, 16, (char *)tbuf, RED);
-            sprintf((char *)tbuf, "Week:%d", week);
-            lcd_show_string(30, 170, 210, 16, 16, (char *)tbuf, RED);
-        }
+        lcd_show_num(1,1,adc_get_value(), 5, 32, RED);
     }
 }
 
