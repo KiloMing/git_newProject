@@ -1,22 +1,4 @@
-/**
- ****************************************************************************************************
- * @file        lvgl_demo.c
- * @author      正点原子团队(ALIENTEK)
- * @version     V1.0
- * @date        2022-01-11
- * @brief       LVGL lv_arc(圆弧) 实验
- * @license     Copyright (c) 2020-2032, 广州市星翼电子科技有限公司
- ****************************************************************************************************
- * @attention
- *
- * 实验平台:正点原子 阿波罗 H743开发板
- * 在线视频:www.yuanzige.com
- * 技术论坛:www.openedv.com
- * 公司网址:www.alientek.com
- * 购买地址:openedv.taobao.com
- *
- ****************************************************************************************************
- */
+
  
 #include "lvgl_demo.h"
 #include "./BSP/LED/led.h"
@@ -27,6 +9,7 @@
 #include "lv_port_disp_template.h"
 #include "lv_port_indev_template.h"
 #include "LVGL/GUI_APP/lv_mainstart.h"
+#include "app_runtime.h"
 
 
 /******************************************************************************************************/
@@ -48,13 +31,22 @@ void start_task(void *pvParameters);    /* 任务函数 */
 TaskHandle_t LV_DEMOTask_Handler;       /* 任务句柄 */
 void lv_demo_task(void *pvParameters);  /* 任务函数 */
 
-/* LED_TASK 任务 配置
+/* ALARM_TASK 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
-#define LED_TASK_PRIO       4           /* 任务优先级 */
-#define LED_STK_SIZE        128         /* 任务堆栈大小 */
-TaskHandle_t LEDTask_Handler;           /* 任务句柄 */
-void led_task(void *pvParameters);      /* 任务函数 */
+#define ALARM_TASK_PRIO     5           /* 任务优先级 */
+#define ALARM_STK_SIZE      128         /* 任务堆栈大小 */
+TaskHandle_t AlarmTask_Handler;         /* 任务句柄 */
+void alarm_task(void *pvParameters);    /* 任务函数 */
+
+/* ANALYZE_TASK 任务 配置
+ * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
+ */
+#define ANALYZE_TASK_PRIO   4           /* 任务优先级 */
+#define ANALYZE_STK_SIZE    128         /* 任务堆栈大小 */
+TaskHandle_t AnalyzeTask_Handler;       /* 任务句柄 */
+void analyze_task(void *pvParameters);  /* 任务函数 */
+
 /******************************************************************************************************/
 
 
@@ -91,13 +83,21 @@ void start_task(void *pvParameters)
                 (UBaseType_t    )LV_DEMO_TASK_PRIO,
                 (TaskHandle_t*  )&LV_DEMOTask_Handler);
 
-    /* LED测试任务 */
-    xTaskCreate((TaskFunction_t )led_task,
-                (const char*    )"led_task",
-                (uint16_t       )LED_STK_SIZE,
+    /* 告警任务 */
+    xTaskCreate((TaskFunction_t )alarm_task,
+                (const char*    )"alarm_task",
+                (uint16_t       )ALARM_STK_SIZE,
                 (void*          )NULL,
-                (UBaseType_t    )LED_TASK_PRIO,
-                (TaskHandle_t*  )&LEDTask_Handler);
+                (UBaseType_t    )ALARM_TASK_PRIO,
+                (TaskHandle_t*  )&AlarmTask_Handler);
+
+    /* 数据分析任务 */
+    xTaskCreate((TaskFunction_t )analyze_task,
+                (const char*    )"analyze_task",
+                (uint16_t       )ANALYZE_STK_SIZE,
+                (void*          )NULL,
+                (UBaseType_t    )ANALYZE_TASK_PRIO,
+                (TaskHandle_t*  )&AnalyzeTask_Handler);
 
     taskEXIT_CRITICAL();            /* 退出临界区 */
     vTaskDelete(StartTask_Handler); /* 删除开始任务 */
@@ -110,27 +110,57 @@ void start_task(void *pvParameters)
  */
 void lv_demo_task(void *pvParameters)
 {
-    lv_mainstart();  /* 测试的demo */
+    lv_mainstart();              /* 创建三个LVGL页面 */
+    app_runtime_ui_start();      /* 启动RTC和模拟数据刷新 */
     
     while(1)
     {
+        app_runtime_ui_process();
         lv_timer_handler(); /* LVGL计时器 */
         vTaskDelay(5);
     }
 }
 
 /**
- * @brief       系统再运行
+ * @brief       告警任务
  * @param       pvParameters : 传入参数(未用到)
  * @retval      无
  */
-void led_task(void *pvParameters)
+void alarm_task(void *pvParameters)
+{
+   while(1)
+   {
+       if(alarm_flag == ALARM_FANG_DANGLE)
+       {
+            LED1(1);
+            LED0(0);
+            app_interface_set_fan_enabled(true);
+            app_interface_set_window_open(true);
+        }
+       else if(alarm_flag == ALARM_FANG_WORN)
+       {
+            LED0(1);
+            LED1_TOGGLE();
+            app_interface_set_fan_enabled(false);
+            app_interface_set_window_open(true);
+        }
+       else if(alarm_flag == ALARM_FANG_SAFE)
+       {    
+            LED0(1);
+            LED1(0);
+            app_interface_set_fan_enabled(false);
+            app_interface_set_window_open(false);
+        }
+       vTaskDelay(1000);
+   }
+}
+
+void analyze_task(void *pvParameters)
 {
     while(1)
     {
-        LED0_TOGGLE();
+        app_runtime_analyze();
         vTaskDelay(1000);
     }
 }
-
 

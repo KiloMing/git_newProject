@@ -28,6 +28,7 @@
 #include "./BSP/TOUCH/touch.h"
 #include "./BSP/LCD/lcd.h"
 #include "lvgl_demo.h"
+#include "app_runtime.h"
 
 
 int main(void)
@@ -41,6 +42,7 @@ int main(void)
     led_init();                                                 /* 初始化LED */
     key_init();                                                 /* 初始化KEY */
     sdram_init();                                               /* 初始化SDRAM */
+    app_runtime_hardware_init();                                /* 初始化RTC */
 
     /* 电阻屏坐标矫正 */
     if (key_scan(0) == KEY0_PRES)                               /* KEY0按下,则执行校准程序 */
@@ -52,3 +54,5 @@ int main(void)
     
     lvgl_demo();                                                /* 运行FreeRTOS例程 */
 }
+
+

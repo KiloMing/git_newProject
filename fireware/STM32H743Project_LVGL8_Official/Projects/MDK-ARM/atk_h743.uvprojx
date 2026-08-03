@@ -410,6 +410,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\lvgl_demo.c</FilePath>
             </File>
+            <File>
+              <FileName>app_runtime.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\app_runtime.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
