@@ -13,7 +13,7 @@
 #include "./SYSTEM/sys/sys.h"
 #include "./BSP/RTC/rtc.h"
 #include "app_interface.h"
-
+#include "lvgl_demo.h"
 #define APP_UI_UPDATE_PERIOD_MS 1000U
 
 static uint32_t s_last_ui_update_ms;
@@ -24,6 +24,11 @@ volatile uint8_t alarm_flag = 0;
 #define ANARM_FANG_SAFE       3
 #define ANARM_FANG_WRON       2
 #define ANARM_FANG_DANGLE     1
+
+#define FAN_OFF               2
+#define FAN_ON                3
+#define SENSER_OFF            4
+#define SENSER_ON             5
 void app_runtime_hardware_init(void)
 {
     uint8_t year;
@@ -60,57 +65,57 @@ static void app_runtime_refresh_widgets(void)
     uint8_t minute;
     uint8_t second;
     uint8_t ampm;
-    float gas_values[APP_SENSOR_COUNT];
-    float triangle;
-    float o2_offset;
+    float gas_values[APP_SENSOR_COUNT] = {0.0f};
+    float triangle = 0.0f;
 
     rtc_get_time(&hour, &minute, &second, &ampm);
     rtc_get_date(&year, &month, &date, &week);
     app_interface_set_datetime((uint16_t)(2000U + year), month, date, hour, minute);
 
-    /* triangle每秒从0上升到60，再下降到0，用于生成可重复的测试数据。 */
-    triangle = (s_simulation_phase <= 60U)
-               ? (float)s_simulation_phase
-               : (float)(120U - s_simulation_phase);
+    // /* triangle每秒从0上升到60，再下降到0，用于生成可重复的测试数据。 */
+    // triangle = (s_simulation_phase <= 60U)
+    //            ? (float)s_simulation_phase
+    //            : (float)(120U - s_simulation_phase);
 
-    /* 每个数组下标严格使用app_sensor_id_t，防止气体名称和数值错位。 */
-    gas_values[APP_SENSOR_CO]  = triangle * 0.60f;          /* 0~36 ppm */
-    gas_values[APP_SENSOR_CO2] = 400.0f + triangle * 80.0f; /* 400~5200 ppm */
+    // /* 每个数组下标严格使用app_sensor_id_t，防止气体名称和数值错位。 */
+    gas_values[APP_SENSOR_CO]  = co_value_test * 0.60f;          /* 0~36 ppm */
+    gas_values[APP_SENSOR_CO2] = 400.0f + co2_value_test * 80.0f; /* 400~5200 ppm */
     gas_values[APP_SENSOR_H2S] = triangle * 0.20f;          /* 0~12 ppm */
     gas_values[APP_SENSOR_SO2] = triangle * 0.04f;          /* 0~2.4 ppm */
     gas_values[APP_SENSOR_NH3] = triangle * 0.50f;          /* 0~30 ppm */
 
-    /* O2围绕20.9%上下变化，依次经过高氧和低氧阈值。 */
-    if(s_simulation_phase <= 30U) {
-        o2_offset = (float)s_simulation_phase;
-    }
-    else if(s_simulation_phase <= 90U) {
-        o2_offset = (float)(60 - (int32_t)s_simulation_phase);
-    }
-    else {
-        o2_offset = (float)((int32_t)s_simulation_phase - 120);
-    }
-    gas_values[APP_SENSOR_O2] = 20.9f + o2_offset * 0.10f; /* 17.9~23.9 %vol */
+    // /* O2围绕20.9%上下变化，依次经过高氧和低氧阈值。 */
+    // if(s_simulation_phase <= 30U) {
+    //     o2_offset = (float)s_simulation_phase;
+    // }
+    // else if(s_simulation_phase <= 90U) {
+    //     o2_offset = (float)(60 - (int32_t)s_simulation_phase);
+    // }
+    // else {
+    //     o2_offset = (float)((int32_t)s_simulation_phase - 120);
+    // }
+    gas_values[APP_SENSOR_O2] = 20.0f; /* 17.9~23.9 %vol */
 
     app_interface_set_all_gas_values(gas_values);
-    app_interface_set_environment(22.0f + triangle * 0.10f,  /* 22.0~28.0 C */
-                                  45.0f + triangle * 0.40f); /* 45.0~69.0 %RH */
+    // app_interface_set_environment(22.0f + triangle * 0.10f,  /* 22.0~28.0 C */
+    //                               45.0f + triangle * 0.40f); /* 45.0~69.0 %RH */
 
-    s_simulation_phase++;
-    if(s_simulation_phase > 120U) {
-        s_simulation_phase = 0U;
-    }
+    // s_simulation_phase++;
+    // if(s_simulation_phase > 120U) {
+    //     s_simulation_phase = 0U;
+    // }
 }
 
 void app_runtime_ui_start(void)
 {
     /* 用户要求CO和CO2显示为已连接，其他四路保持未连接。 */
-    app_interface_set_sensor_connected(APP_SENSOR_CO, true);
-    app_interface_set_sensor_connected(APP_SENSOR_CO2, true);
+    app_interface_set_sensor_connected(APP_SENSOR_CO, false); 
+    app_interface_set_sensor_connected(APP_SENSOR_CO2, false);
     app_interface_set_sensor_connected(APP_SENSOR_O2, false);
     app_interface_set_sensor_connected(APP_SENSOR_H2S, false);
     app_interface_set_sensor_connected(APP_SENSOR_SO2, false);
     app_interface_set_sensor_connected(APP_SENSOR_NH3, false);
+
 
     s_simulation_phase = 0U;
     s_last_ui_update_ms = HAL_GetTick();

@@ -27,6 +27,7 @@
 #include "./BSP/MPU/mpu.h"
 #include "./BSP/TOUCH/touch.h"
 #include "./BSP/LCD/lcd.h"
+#include "./BSP/LORA/lora.h"
 #include "lvgl_demo.h"
 #include "app_runtime.h"
 
@@ -37,7 +38,7 @@ int main(void)
     HAL_Init();                                                 /* 初始化HAL库 */
     sys_stm32_clock_init(192, 5, 2, 4);                         /* 设置时钟, 480Mhz */
     delay_init(480);                                            /* 延时初始化 */
-    usart_init(115200);                                         /* 串口初始化 */
+    lora_init(9600U);                                           /* LoRa串口和DMA接收初始化 */
     mpu_memory_protection();                                    /* 保护相关存储区域 */
     led_init();                                                 /* 初始化LED */
     key_init();                                                 /* 初始化KEY */

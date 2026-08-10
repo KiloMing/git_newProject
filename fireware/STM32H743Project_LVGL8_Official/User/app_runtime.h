@@ -9,6 +9,11 @@ extern volatile uint8_t alarm_flag;
 #define ALARM_FANG_WORN 2
 #define ALARM_FANG_SAFE 3
 
+#define FAN_OFF               2
+#define FAN_ON                3
+#define SENSER_OFF            4
+#define SENSER_ON             5
+
 /** 在main()中调用：初始化RTC，并在RTC内容无效时写入初始时间。 */
 void app_runtime_hardware_init(void);
 

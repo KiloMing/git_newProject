@@ -4,7 +4,7 @@
 #include "./BSP/LED/led.h"
 #include "FreeRTOS.h"
 #include "task.h"
-
+#include "./BSP/LORA/lora.h"
 #include "lvgl.h"
 #include "lv_port_disp_template.h"
 #include "lv_port_indev_template.h"
@@ -47,6 +47,17 @@ void alarm_task(void *pvParameters);    /* 任务函数 */
 TaskHandle_t AnalyzeTask_Handler;       /* 任务句柄 */
 void analyze_task(void *pvParameters);  /* 任务函数 */
 
+/**
+ * RECEIVE_DATA_TASK 任务配置
+ * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
+ */
+#define RECEIVE_DATA_TASK_PRTO   4      /* 任务优先级 */
+#define RECEIVE_DATA_STK_SIZE    256    /* LoRa协议解析需要较大的局部缓冲区 */
+TaskHandle_t ReceiveTask_Handler;       /* 任务句柄 */
+void receive_data_tack(void *pvParameters); /* 任务函数 */
+
+volatile uint16_t co_value_test = 0;
+volatile uint16_t co2_value_test = 0;
 /******************************************************************************************************/
 
 
@@ -99,6 +110,14 @@ void start_task(void *pvParameters)
                 (UBaseType_t    )ANALYZE_TASK_PRIO,
                 (TaskHandle_t*  )&AnalyzeTask_Handler);
 
+    xTaskCreate((TaskFunction_t )receive_data_tack,
+                (const char*    )"receive_data_task",
+                (uint16_t       )RECEIVE_DATA_STK_SIZE,
+                (void*          )NULL,
+                (UBaseType_t    )RECEIVE_DATA_TASK_PRTO,
+                (TaskHandle_t*  )&ReceiveTask_Handler);
+                
+
     taskEXIT_CRITICAL();            /* 退出临界区 */
     vTaskDelete(StartTask_Handler); /* 删除开始任务 */
 }
@@ -135,21 +154,37 @@ void alarm_task(void *pvParameters)
             LED1(1);
             LED0(0);
             app_interface_set_fan_enabled(true);
+            lora_send_byte(FAN_ON, 0x00, 0x04, 0x16);
+            vTaskDelay(100U);
+             
             app_interface_set_window_open(true);
+            lora_send_byte(SENSER_ON, 0x00, 0x04, 0x16);
+
+            
         }
        else if(alarm_flag == ALARM_FANG_WORN)
        {
             LED0(1);
             LED1_TOGGLE();
             app_interface_set_fan_enabled(false);
+            lora_send_byte(FAN_OFF, 0x00, 0x04, 0x16);
+            vTaskDelay(100U);
+
             app_interface_set_window_open(true);
+            lora_send_byte(SENSER_ON, 0x00, 0x04, 0x16);
+
         }
        else if(alarm_flag == ALARM_FANG_SAFE)
        {    
             LED0(1);
             LED1(0);
             app_interface_set_fan_enabled(false);
+            lora_send_byte(FAN_OFF, 0x00, 0x04, 0x16);
+            vTaskDelay(100U);
+
             app_interface_set_window_open(false);
+            lora_send_byte(SENSER_OFF, 0x00, 0x04, 0x16);
+
         }
        vTaskDelay(1000);
    }
@@ -161,6 +196,58 @@ void analyze_task(void *pvParameters)
     {
         app_runtime_analyze();
         vTaskDelay(1000);
+    }
+}
+
+void receive_data_tack(void *pvParameters)
+{
+    uint8_t num_set_0[5];
+    uint8_t num_set_1[5];
+    while(1)
+    {
+        //co 4 22
+        lora_send_byte(1, 0x00, 0x04, 0x16);
+        uint32_t start = HAL_GetTick();
+        while (HAL_GetTick() - start < 1000U)
+        {
+            uint16_t len = sizeof(num_set_0);
+            if (lora_receive_array(num_set_0, sizeof(num_set_0), &len) == LORA_OK)
+            {
+                if (len == 2U)
+                {
+                    co_value_test = ((uint16_t)num_set_0[0] << 8) | num_set_0[1];
+                }
+                app_interface_set_sensor_connected(APP_SENSOR_CO, true);
+                break;
+            }else{
+                app_interface_set_sensor_connected(APP_SENSOR_CO, false);
+            }
+            vTaskDelay(1U);
+        }
+        vTaskDelay(500U);
+
+        //co2 1 19
+        lora_send_byte(1, 0x00, 0x01, 0x13);
+        uint32_t start_1 = HAL_GetTick();
+        while (HAL_GetTick() - start_1 < 1000U)
+        {
+            uint16_t len = sizeof(num_set_1);
+            if (lora_receive_array(num_set_1, sizeof(num_set_1), &len) == LORA_OK)
+            {
+                if (len == 2U)
+                {
+                    co2_value_test = ((uint16_t)num_set_1[0] << 8) | num_set_1[1];
+                }
+                app_interface_set_sensor_connected(APP_SENSOR_CO2, true);
+                break;
+            }else {
+                app_interface_set_sensor_connected(APP_SENSOR_CO2, false);
+
+            }
+
+            vTaskDelay(1U);
+        }
+        vTaskDelay(500U);
     }
 }
 

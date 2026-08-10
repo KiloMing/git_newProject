@@ -640,6 +640,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\BSP\DMA\dma_1.c</FilePath>
             </File>
+            <File>
+              <FileName>lora.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\LORA\lora.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
