@@ -124,7 +124,7 @@ static void app_runtime_refresh_widgets(void)
     // else {
     //     o2_offset = (float)((int32_t)s_simulation_phase - 120);
     // }
-    gas_values[APP_SENSOR_O2] = 0.0f;
+    gas_values[APP_SENSOR_O2] = 21.0f;
 
     app_interface_set_all_gas_values(gas_values);
     app_interface_set_environment(temperature_value_test * 0.010f,  /* 22.0~28.0 C */
