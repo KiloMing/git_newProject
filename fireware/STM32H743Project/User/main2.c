@@ -1,19 +1,13 @@
 /**
  ****************************************************************************************************
  * @file        main.c
- * @author      正点原子团队(ALIENTEK)
  * @version     V1.0
  * @date        2022-09-06
  * @brief       TFTLCD(MCU屏) 实验
- * @license     Copyright (c) 2020-2032, 广州市星翼电子科技有限公司
  ****************************************************************************************************
  * @attention
  *
- * 实验平台:正点原子 阿波罗 H743开发板
- * 在线视频:www.yuanzige.com
- * 技术论坛:www.openedv.com
- * 公司网址:www.alientek.com
- * 购买地址:openedv.taobao.com
+ * 实验平台:STM32H743开发板
  *
  ****************************************************************************************************
  */
@@ -132,7 +126,7 @@ int main(void)
 
         lcd_show_string(64, 64, 240, 32, 32, "STM32", RED);
         lcd_show_string(64, 104, 240, 24, 24, "TFTLCD TEST", RED);
-        lcd_show_string(64, 134, 240, 16, 16, "ATOM@ALIENTEK", RED);
+        lcd_show_string(64, 134, 240, 16, 16, "ENV MONITOR", RED);
         lcd_show_string(64, 154, 240, 16, 16, (char*)lcd_id, RED);  /* 显示LCD ID */
 
         x++;

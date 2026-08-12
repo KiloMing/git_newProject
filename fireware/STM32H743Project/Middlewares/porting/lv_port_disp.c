@@ -1,6 +1,6 @@
 /**
  * @file lv_port_disp.c
- * @brief LVGL 9与正点原子FMC MCU屏驱动之间的显示移植层。
+ * @brief LVGL 9与FMC MCU屏驱动之间的显示移植层。
  *
  * LCD接口为16位RGB565。LVGL只渲染若干行到外部SDRAM中的局部缓冲区，
  * 随后本文件把这些像素连续写入LCD GRAM，从而避免申请完整帧缓冲。
@@ -11,7 +11,7 @@
 #include "lvgl.h"
 #include "./BSP/LCD/lcd.h"
 
-/* 正点原子LCD驱动支持的最大横向分辨率为800像素。 */
+/* LCD BSP驱动支持的最大横向分辨率为800像素。 */
 #define LV_PORT_DISP_MAX_WIDTH       800U
 
 /* 每次渲染20行：800 * 20 * 2 = 32KB，位于1MB LVGL内存池之后。 */
@@ -34,7 +34,7 @@ static void lv_port_disp_flush(lv_display_t *display,
                                uint8_t *px_map)
 {
     /*
-     * 直接复用正点原子LCD驱动已经验证的彩色块写入函数。
+     * 直接复用LCD BSP驱动已经验证的彩色块写入函数。
      * 对NT35510（ID 0x5510），该函数会逐行调用lcd_set_cursor()，并使用
      * 0x2A00/0x2B00/0x2C00寄存器写法；不能假设它与SSD1963完全相同，
      * 在只设置一次窗口后就能可靠地跨越多行连续写入。

@@ -1,7 +1,7 @@
 /**
  ****************************************************************************************************
  * @file        lv_port_indev.c
- * @brief       正点原子触摸驱动到 LVGL 9 的输入设备移植层
+ * @brief       触摸屏驱动到 LVGL 9 的输入设备移植层
  *
  * @note
  * - 底层直接使用官方 touch.c 中的 tp_dev.init() 和 tp_dev.scan()。
@@ -19,7 +19,7 @@ static lv_indev_t *s_touch_indev;
 /**
  * @brief LVGL周期调用的触摸读取回调。
  *
- * tp_dev.scan(0) 返回已经由正点原子驱动转换后的屏幕坐标，因此这里不再交换X/Y。
+ * tp_dev.scan(0) 返回已经由触摸屏驱动转换后的屏幕坐标，因此这里不再交换X/Y。
  */
 static void lv_port_touch_read(lv_indev_t *indev, lv_indev_data_t *data)
 {
