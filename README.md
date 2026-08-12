@@ -1,6 +1,6 @@
 # STM32H743 环境监测终端工程架构与实现说明
 
-> 本文依据当前工作区代码编写，目标工程为 [atk_h743.uvprojx](../Projects/MDK-ARM/atk_h743.uvprojx)。文档只说明现有实现，不代表所有预留传感器均已接入。
+> 本文依据当前工作区代码编写，目标工程为 [atk_h743.uvprojx](fireware/STM32H743Project_LVGL8_Official/Projects/MDK-ARM/atk_h743.uvprojx)。文档只说明现有实现，不代表所有预留传感器均已接入。
 
 ## 1. 工程目标与当前功能
 
@@ -46,17 +46,17 @@ flowchart TD
 
 ### 2.1 启动与硬件层
 
-- [User/main.c](../User/main.c)：程序入口，完成 Cache、HAL、480 MHz 系统时钟、LoRa、MPU、LED、按键、SDRAM、RTC 和触摸校准初始化。
-- [Drivers/SYSTEM/sys/sys.c](../Drivers/SYSTEM/sys/sys.c)：系统时钟、Cache 和底层系统配置。
-- [Drivers/SYSTEM/delay/delay.c](../Drivers/SYSTEM/delay/delay.c)：启动阶段使用的延时接口。
-- [Drivers/BSP/MPU/mpu.c](../Drivers/BSP/MPU/mpu.c)：配置 H743 内存区域属性。
-- [Drivers/BSP/SDRAM/sdram.c](../Drivers/BSP/SDRAM/sdram.c)：初始化外部 SDRAM，为显示缓冲等大内存对象提供空间。
-- [Drivers/BSP/LCD/lcd.c](../Drivers/BSP/LCD/lcd.c) 与 [ltdc.c](../Drivers/BSP/LCD/ltdc.c)：LCD 和 LTDC 显示驱动。
-- [Drivers/BSP/TOUCH/touch.c](../Drivers/BSP/TOUCH/touch.c)：触摸输入与校准数据。
-- [Drivers/BSP/RTC/rtc.c](../Drivers/BSP/RTC/rtc.c)：RTC 初始化、日期和时间读写。
-- [Drivers/BSP/LED/led.c](../Drivers/BSP/LED/led.c)：板载告警 LED 控制。
+- [User/main.c](fireware/STM32H743Project_LVGL8_Official/User/main.c)：程序入口，完成 Cache、HAL、480 MHz 系统时钟、LoRa、MPU、LED、按键、SDRAM、RTC 和触摸校准初始化。
+- [Drivers/SYSTEM/sys/sys.c](fireware/STM32H743Project_LVGL8_Official/Drivers/SYSTEM/sys/sys.c)：系统时钟、Cache 和底层系统配置。
+- [Drivers/SYSTEM/delay/delay.c](fireware/STM32H743Project_LVGL8_Official/Drivers/SYSTEM/delay/delay.c)：启动阶段使用的延时接口。
+- [Drivers/BSP/MPU/mpu.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/MPU/mpu.c)：配置 H743 内存区域属性。
+- [Drivers/BSP/SDRAM/sdram.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/SDRAM/sdram.c)：初始化外部 SDRAM，为显示缓冲等大内存对象提供空间。
+- [Drivers/BSP/LCD/lcd.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/LCD/lcd.c) 与 [ltdc.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/LCD/ltdc.c)：LCD 和 LTDC 显示驱动。
+- [Drivers/BSP/TOUCH/touch.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/TOUCH/touch.c)：触摸输入与校准数据。
+- [Drivers/BSP/RTC/rtc.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/RTC/rtc.c)：RTC 初始化、日期和时间读写。
+- [Drivers/BSP/LED/led.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/LED/led.c)：板载告警 LED 控制。
 
-核心启动代码位于 [main.c:35](../User/main.c#L35)：
+核心启动代码位于 [main.c:35](fireware/STM32H743Project_LVGL8_Official/User/main.c#L35)：
 
 ```c
 int main(void)
@@ -77,12 +77,12 @@ int main(void)
 
 ### 2.2 LoRa 串口与 DMA 驱动层
 
-- [Drivers/SYSTEM/usart/usart.c](../Drivers/SYSTEM/usart/usart.c)：USART1 初始化、空闲线 DMA 接收和 4 深度帧队列。
-- [Drivers/BSP/DMA/dma_1.c](../Drivers/BSP/DMA/dma_1.c)：USART1_RX 对应 DMA1 Stream2。
-- [Drivers/BSP/LORA/lora.c](../Drivers/BSP/LORA/lora.c)：LoRa 定点发送、数据包封装、CRC-16/CCITT-FALSE 校验和接收解析。
-- [Drivers/BSP/LORA/lora.h](../Drivers/BSP/LORA/lora.h)：LoRa 帧常量、状态码和公共接口。
+- [Drivers/SYSTEM/usart/usart.c](fireware/STM32H743Project_LVGL8_Official/Drivers/SYSTEM/usart/usart.c)：USART1 初始化、空闲线 DMA 接收和 4 深度帧队列。
+- [Drivers/BSP/DMA/dma_1.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/DMA/dma_1.c)：USART1_RX 对应 DMA1 Stream2。
+- [Drivers/BSP/LORA/lora.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/LORA/lora.c)：LoRa 定点发送、数据包封装、CRC-16/CCITT-FALSE 校验和接收解析。
+- [Drivers/BSP/LORA/lora.h](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/LORA/lora.h)：LoRa 帧常量、状态码和公共接口。
 
-USART1 硬件对应关系见 [usart.h:37](../Drivers/SYSTEM/usart/usart.h#L37)：
+USART1 硬件对应关系见 [usart.h:37](fireware/STM32H743Project_LVGL8_Official/Drivers/SYSTEM/usart/usart.h#L37)：
 
 | 功能 | 外设/引脚 | 参数 |
 |---|---|---|
@@ -95,13 +95,13 @@ USART1 硬件对应关系见 [usart.h:37](../Drivers/SYSTEM/usart/usart.h#L37)�
 接收链路为：
 
 1. `lora_init(9600)` 调用 `usart_init()`，随后启动 `HAL_UARTEx_ReceiveToIdle_DMA()`。
-2. UART 空闲事件进入 [HAL_UARTEx_RxEventCallback()](../Drivers/SYSTEM/usart/usart.c#L306)。
+2. UART 空闲事件进入 [HAL_UARTEx_RxEventCallback()](fireware/STM32H743Project_LVGL8_Official/Drivers/SYSTEM/usart/usart.c#L306)。
 3. 回调使 D-Cache 中对应区域失效，将本帧复制进 4 深度软件队列，然后重新启动 DMA。
 4. 应用任务通过 `uart1_rx_frame_take()` 取出一帧。
 5. `lora_receive_packet()` 搜索 `0x4C 0x52` 魔数，校验版本、类型、长度和 CRC。
 6. `lora_receive_array()` 只接受二进制数组包，并向上层返回有效负载。
 
-LoRa 数组包格式见 [lora.h:63](../Drivers/BSP/LORA/lora.h#L63)：
+LoRa 数组包格式见 [lora.h:63](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/LORA/lora.h#L63)：
 
 ```text
 [目标地址高][目标地址低][目标信道]
@@ -113,10 +113,10 @@ LoRa 数组包格式见 [lora.h:63](../Drivers/BSP/LORA/lora.h#L63)：
 
 ### 2.3 FreeRTOS 任务与应用调度层
 
-- [User/lvgl_demo.c](../User/lvgl_demo.c)：初始化 LVGL，创建所有应用任务并启动调度器。
-- [User/lora_comm.c](../User/lora_comm.c)：LoRa 发送队列、发送任务和传感器轮询任务。
-- [User/data_analysis.c](../User/data_analysis.c)：数据分析任务和告警执行任务。
-- [User/FreeRTOSConfig.h](../User/FreeRTOSConfig.h)：1 kHz RTOS Tick、46 KiB FreeRTOS Heap 等配置。
+- [User/lvgl_demo.c](fireware/STM32H743Project_LVGL8_Official/User/lvgl_demo.c)：初始化 LVGL，创建所有应用任务并启动调度器。
+- [User/lora_comm.c](fireware/STM32H743Project_LVGL8_Official/User/lora_comm.c)：LoRa 发送队列、发送任务和传感器轮询任务。
+- [User/data_analysis.c](fireware/STM32H743Project_LVGL8_Official/User/data_analysis.c)：数据分析任务和告警执行任务。
+- [User/FreeRTOSConfig.h](fireware/STM32H743Project_LVGL8_Official/User/FreeRTOSConfig.h)：1 kHz RTOS Tick、46 KiB FreeRTOS Heap 等配置。
 
 任务创建关系：
 
@@ -154,18 +154,18 @@ sequenceDiagram
 
 ### 2.4 运行时协调层
 
-[User/app_runtime.c](../User/app_runtime.c) 是硬件数据与 UI 之间的协调层，主要负责：
+[User/app_runtime.c](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.c) 是硬件数据与 UI 之间的协调层，主要负责：
 
 - 初始化 RTC，并只在 RTC 内容无效时写入默认时间。
 - 每 1000 ms 读取 RTC、生成六路气体数组、换算温湿度并刷新 UI。
 - 保存 CO 的 24 点历史数组。
 - 根据六路仪表的危险百分比生成 `alarm_flag`。
 
-该层不创建 LVGL 控件，只通过 [app_interface.h](../User/UI/app_interface.h) 暴露的统一接口更新界面。
+该层不创建 LVGL 控件，只通过 [app_interface.h](fireware/STM32H743Project_LVGL8_Official/User/UI/app_interface.h) 暴露的统一接口更新界面。
 
 ### 2.5 UI 适配接口层
 
-[User/UI/app_interface.c](../User/UI/app_interface.c) 把应用语义转换成具体 LVGL 控件操作，降低运行时与页面布局之间的耦合。
+[User/UI/app_interface.c](fireware/STM32H743Project_LVGL8_Official/User/UI/app_interface.c) 把应用语义转换成具体 LVGL 控件操作，降低运行时与页面布局之间的耦合。
 
 | 应用接口 | 写入的 UI 对象/状态 | 最终显示 |
 |---|---|---|
@@ -177,17 +177,17 @@ sequenceDiagram
 | `app_interface_set_fan_enabled()` | 风扇标志、Switch 和文字 | ON/OFF |
 | `app_interface_set_window_open()` | 开窗标志、Switch 和文字 | OPEN/CLOSED |
 
-状态位定义于 [app_interface.h:35](../User/UI/app_interface.h#L35)。位 0～5 对应六路传感器，位 6 对应风扇，位 7 对应开窗舵机。
+状态位定义于 [app_interface.h:35](fireware/STM32H743Project_LVGL8_Official/User/UI/app_interface.h#L35)。位 0～5 对应六路传感器，位 6 对应风扇，位 7 对应开窗舵机。
 
 ### 2.6 UI 页面与组件层
 
-- [User/UI/ui.c](../User/UI/ui.c)：UI 总入口；STM32 工程关闭模拟定时器。
-- [User/UI/page.c](../User/UI/page.c)：创建 `CurrentValues`、`PastValues`、`Settings` 三个页面，并建立六路气体对象的一致顺序。
-- [User/UI/testvalue.c](../User/UI/testvalue.c)：单个气体仪表、阈值模型、危险百分比和蓝/黄/红颜色。
-- [User/UI/chart.c](../User/UI/chart.c)：24 点历史图、阈值虚线、分段着色和小数缩放。
-- [User/UI/setting.c](../User/UI/setting.c)：RTC、连接 LED、温湿度、风扇和开窗控件。
-- [Middlewares/LVGL/GUI_APP/lv_mainstart.c](../Middlewares/LVGL/GUI_APP/lv_mainstart.c)：从官方示例入口转到 `ui_init()`。
-- [Middlewares/LVGL/GUI/lvgl/lv_conf.h](../Middlewares/LVGL/GUI/lvgl/lv_conf.h)：LVGL 配置，当前颜色深度为 16 bit。
+- [User/UI/ui.c](fireware/STM32H743Project_LVGL8_Official/User/UI/ui.c)：UI 总入口；STM32 工程关闭模拟定时器。
+- [User/UI/page.c](fireware/STM32H743Project_LVGL8_Official/User/UI/page.c)：创建 `CurrentValues`、`PastValues`、`Settings` 三个页面，并建立六路气体对象的一致顺序。
+- [User/UI/testvalue.c](fireware/STM32H743Project_LVGL8_Official/User/UI/testvalue.c)：单个气体仪表、阈值模型、危险百分比和蓝/黄/红颜色。
+- [User/UI/chart.c](fireware/STM32H743Project_LVGL8_Official/User/UI/chart.c)：24 点历史图、阈值虚线、分段着色和小数缩放。
+- [User/UI/setting.c](fireware/STM32H743Project_LVGL8_Official/User/UI/setting.c)：RTC、连接 LED、温湿度、风扇和开窗控件。
+- [Middlewares/LVGL/GUI_APP/lv_mainstart.c](fireware/STM32H743Project_LVGL8_Official/Middlewares/LVGL/GUI_APP/lv_mainstart.c)：从官方示例入口转到 `ui_init()`。
+- [Middlewares/LVGL/GUI/lvgl/lv_conf.h](fireware/STM32H743Project_LVGL8_Official/Middlewares/LVGL/GUI/lvgl/lv_conf.h)：LVGL 配置，当前颜色深度为 16 bit。
 
 三个页面的职责：
 
@@ -199,7 +199,7 @@ sequenceDiagram
 
 ## 3. 六路气体的一致下标关系
 
-六路气体必须始终使用 [app_sensor_id_t](../User/UI/app_interface.h#L22) 的固定顺序。该顺序同时用于仪表数组、历史图数组、连接状态位和 Settings LED：
+六路气体必须始终使用 [app_sensor_id_t](fireware/STM32H743Project_LVGL8_Official/User/UI/app_interface.h#L22) 的固定顺序。该顺序同时用于仪表数组、历史图数组、连接状态位和 Settings LED：
 
 | 下标 | 枚举 | 气体 | 实时仪表 | 历史图 | 连接标志 |
 |---:|---|---|---|---|---|
@@ -216,7 +216,7 @@ sequenceDiagram
 
 ### 4.1 轮询命令与节点对应关系
 
-轮询逻辑位于 [sensor_polling_task()](../User/lora_comm.c#L136)，每一路先发送一个 1 字节命令，再在最长 1000 ms 内非阻塞地检查接收队列，轮询之间延时 500 Tick。
+轮询逻辑位于 [sensor_polling_task()](fireware/STM32H743Project_LVGL8_Official/User/lora_comm.c#L136)，每一路先发送一个 1 字节命令，再在最长 1000 ms 内非阻塞地检查接收队列，轮询之间延时 500 Tick。
 
 | 数据项 | 命令值 | 目标地址 | 信道 | 返回长度 | 保存变量 |
 |---|---:|---:|---:|---:|---|
@@ -225,7 +225,7 @@ sequenceDiagram
 | 温度 | `DHT11_TEMPERATURE = 6` | `0x0001` | `0x13` | 2 字节 | `temperature_value_test` |
 | 湿度 | `DHT11_HUMIDITY = 7` | `0x0001` | `0x13` | 2 字节 | `humidity_value_test` |
 
-四个全局采集变量在 [lora_comm.c:3](../User/lora_comm.c#L3) 定义，在 [lora_comm.h:27](../User/lora_comm.h#L27) 使用 `extern` 声明：
+四个全局采集变量在 [lora_comm.c:3](fireware/STM32H743Project_LVGL8_Official/User/lora_comm.c#L3) 定义，在 [lora_comm.h:27](fireware/STM32H743Project_LVGL8_Official/User/lora_comm.h#L27) 使用 `extern` 声明：
 
 ```c
 volatile uint16_t co_value_test = 0;
@@ -244,7 +244,7 @@ value = ((uint16_t)rx[0] << 8) | rx[1];
 
 ### 4.2 原始值到显示值的换算
 
-换算位于 [app_runtime.c:110](../User/app_runtime.c#L110)：
+换算位于 [app_runtime.c:110](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.c#L110)：
 
 ```c
 gas_values[APP_SENSOR_CO] = co_value_test * 0.01f;
@@ -272,7 +272,7 @@ Settings 页 LED 仅表示通信/传感器连接状态：绿色为连接，红�
 
 ## 5. CO 24 点历史数组逻辑
 
-CO 历史数组和状态全部封装在 [app_runtime.c:24](../User/app_runtime.c#L24)：
+CO 历史数组和状态全部封装在 [app_runtime.c:24](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.c#L24)：
 
 ```c
 static float s_co_history[APP_HISTORY_HOURS] = {0.0f};
@@ -281,13 +281,13 @@ static uint8_t s_co_history_count;
 static uint8_t s_co_history_dirty;
 ```
 
-每次 CO 成功解析后，[lora_comm.c:160](../User/lora_comm.c#L160) 先除以 100，再记录：
+每次 CO 成功解析后，[lora_comm.c:160](fireware/STM32H743Project_LVGL8_Official/User/lora_comm.c#L160) 先除以 100，再记录：
 
 ```c
 app_runtime_record_co_sample((float)co_value_test / 100.0f);
 ```
 
-[app_runtime_record_co_sample()](../User/app_runtime.c#L40) 的当前策略为：
+[app_runtime_record_co_sample()](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.c#L40) 的当前策略为：
 
 1. 前 24 次采集依次写入下标 0～23。
 2. 数组装满后，下标固定为 23。
@@ -299,7 +299,7 @@ app_runtime_record_co_sample((float)co_value_test / 100.0f);
 
 ## 6. 实际浓度到危险百分比的转换
 
-仪表中央的 `%` 是危险程度百分比，不是浓度单位；实际浓度显示在圆弧下方。转换实现在 [testvalue.c](../User/UI/testvalue.c)，阈值配置在 [page.c:74](../User/UI/page.c#L74)。
+仪表中央的 `%` 是危险程度百分比，不是浓度单位；实际浓度显示在圆弧下方。转换实现在 [testvalue.c](fireware/STM32H743Project_LVGL8_Official/User/UI/testvalue.c)，阈值配置在 [page.c:74](fireware/STM32H743Project_LVGL8_Official/User/UI/page.c#L74)。
 
 ### 6.1 单边升高模型
 
@@ -346,17 +346,17 @@ O₂ 图表量程为 15～25 %vol。当前运行时固定输入 `21.0f`，因此
 
 ### 7.1 告警状态生成
 
-[app_runtime_analyze()](../User/app_runtime.c#L177) 每秒读取六个 `g_test_array[i].test_value`：
+[app_runtime_analyze()](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.c#L177) 每秒读取六个 `g_test_array[i].test_value`：
 
 - 任意一路危险度达到约 65%，`alarm_flag = ALARM_FANG_DANGLE`。
 - 所有气体危险度都低于约 40%，`alarm_flag = ALARM_FANG_SAFE`。
 - 其余情况为 `ALARM_FANG_WORN`。
 
-`alarm_flag` 在 [app_runtime.c:29](../User/app_runtime.c#L29) 定义，在 [app_runtime.h:6](../User/app_runtime.h#L6) 通过 `extern` 暴露。
+`alarm_flag` 在 [app_runtime.c:29](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.c#L29) 定义，在 [app_runtime.h:6](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.h#L6) 通过 `extern` 暴露。
 
 ### 7.2 告警动作
 
-[alarm_task()](../User/data_analysis.c#L48) 的当前动作：
+[alarm_task()](fireware/STM32H743Project_LVGL8_Official/User/data_analysis.c#L48) 的当前动作：
 
 | 告警状态 | LED | 风扇状态 | 开窗状态 |
 |---|---|---|---|
@@ -368,7 +368,7 @@ O₂ 图表量程为 15～25 %vol。当前运行时固定输入 `21.0f`，因此
 
 ### 7.3 UI 状态到 LoRa 命令
 
-Settings 页 Switch 的事件回调只修改 `g_app_state_flags`。LVGL 任务中的 [fan_sensor_status_read()](../User/lvgl_demo.c#L98) 检查状态变化并将命令放入 LoRa 发送队列：
+Settings 页 Switch 的事件回调只修改 `g_app_state_flags`。LVGL 任务中的 [fan_sensor_status_read()](fireware/STM32H743Project_LVGL8_Official/User/lvgl_demo.c#L98) 检查状态变化并将命令放入 LoRa 发送队列：
 
 | 控制项 | 关闭命令 | 打开命令 | 目标地址 | 信道 |
 |---|---:|---:|---:|---:|
@@ -421,13 +421,13 @@ Keil 工程配置：
 
 推荐按照以下顺序阅读代码：
 
-1. [main.c](../User/main.c)：了解硬件初始化顺序。
-2. [lvgl_demo.c](../User/lvgl_demo.c)：了解任务创建和主循环。
-3. [lora_comm.c](../User/lora_comm.c)：了解轮询命令和原始数据来源。
-4. [usart.c](../Drivers/SYSTEM/usart/usart.c) → [lora.c](../Drivers/BSP/LORA/lora.c)：了解 DMA 入帧和协议解析。
-5. [app_runtime.c](../User/app_runtime.c)：了解单位换算、刷新周期、历史和告警。
-6. [app_interface.c](../User/UI/app_interface.c)：了解业务数据如何映射到 UI。
-7. [page.c](../User/UI/page.c) → [testvalue.c](../User/UI/testvalue.c) → [chart.c](../User/UI/chart.c) → [setting.c](../User/UI/setting.c)：了解页面、阈值、曲线和设置控件。
+1. [main.c](fireware/STM32H743Project_LVGL8_Official/User/main.c)：了解硬件初始化顺序。
+2. [lvgl_demo.c](fireware/STM32H743Project_LVGL8_Official/User/lvgl_demo.c)：了解任务创建和主循环。
+3. [lora_comm.c](fireware/STM32H743Project_LVGL8_Official/User/lora_comm.c)：了解轮询命令和原始数据来源。
+4. [usart.c](fireware/STM32H743Project_LVGL8_Official/Drivers/SYSTEM/usart/usart.c) → [lora.c](fireware/STM32H743Project_LVGL8_Official/Drivers/BSP/LORA/lora.c)：了解 DMA 入帧和协议解析。
+5. [app_runtime.c](fireware/STM32H743Project_LVGL8_Official/User/app_runtime.c)：了解单位换算、刷新周期、历史和告警。
+6. [app_interface.c](fireware/STM32H743Project_LVGL8_Official/User/UI/app_interface.c)：了解业务数据如何映射到 UI。
+7. [page.c](fireware/STM32H743Project_LVGL8_Official/User/UI/page.c) → [testvalue.c](fireware/STM32H743Project_LVGL8_Official/User/UI/testvalue.c) → [chart.c](fireware/STM32H743Project_LVGL8_Official/User/UI/chart.c) → [setting.c](fireware/STM32H743Project_LVGL8_Official/User/UI/setting.c)：了解页面、阈值、曲线和设置控件。
 
 ## 10. 一条 CO 数据的完整例子
 
