@@ -69,7 +69,7 @@ void page_create(lv_obj_t *parent)
     //在grid中创建6个检测仪表
     testvalue_st *co_value = testvalue_create(&g_test_array[0], grid, "CO", "ppm", 0.0f, 0.0f);
     testvalue_st *co2_value = testvalue_create(&g_test_array[1], grid, "CO2", "ppm", 0.0f, 400.0f);
-    testvalue_st *o2_value = testvalue_create(&g_test_array[2], grid, "O2", "%vol", 0.0f, 20.9f);
+    testvalue_st *o2_value = testvalue_create(&g_test_array[2], grid, "O2", "%vol", 0.0f, 0.0f);
     testvalue_st *h2s_value = testvalue_create(&g_test_array[3], grid, "H2S", "ppm", 0.0f, 0.0f);
     testvalue_st *so2_value = testvalue_create(&g_test_array[4], grid, "SO2", "ppm", 0.0f, 0.0f);
     testvalue_st *nh3_value = testvalue_create(&g_test_array[5], grid, "NH3", "ppm", 0.0f, 0.0f);
