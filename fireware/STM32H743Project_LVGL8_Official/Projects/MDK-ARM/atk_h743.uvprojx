@@ -415,6 +415,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\app_runtime.c</FilePath>
             </File>
+            <File>
+              <FileName>lora_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\lora_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>data_analysis.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\data_analysis.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

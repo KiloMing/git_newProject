@@ -23,9 +23,7 @@
 
 #include "app_runtime.h"
 
-extern volatile uint16_t co2_value_test;
-extern volatile uint16_t co_value_test;
-
-void lvgl_demo(void);   /* lvglÀý³Ì */
+void lvgl_demo(void);
+void fan_sensor_status_read(void);   /* lvglÀý³Ì */
 
 #endif

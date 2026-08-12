@@ -207,9 +207,64 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 }
 
 ALIGN_32BYTES(uint8_t g_uart1_rx_dma_buffer[UART1_RX_DMA_BUFFER_SIZE]);
-uint8_t g_uart1_rx_frame[UART1_RX_DMA_BUFFER_SIZE + 1U];
-volatile uint16_t g_uart1_rx_length = 0U;
-volatile uint8_t g_uart1_rx_ready = 0U;
+static uint8_t g_uart1_rx_frame_queue[UART1_RX_FRAME_QUEUE_DEPTH][UART1_RX_DMA_BUFFER_SIZE + 1U];
+static uint16_t g_uart1_rx_frame_lengths[UART1_RX_FRAME_QUEUE_DEPTH];
+static volatile uint8_t g_uart1_rx_frame_head = 0U;
+static volatile uint8_t g_uart1_rx_frame_tail = 0U;
+static volatile uint8_t g_uart1_rx_frame_count = 0U;
+
+void uart1_rx_frame_queue_reset(void)
+{
+    uint32_t primask = __get_PRIMASK();
+
+    __disable_irq();
+    g_uart1_rx_frame_head = 0U;
+    g_uart1_rx_frame_tail = 0U;
+    g_uart1_rx_frame_count = 0U;
+    if (primask == 0U)
+    {
+        __enable_irq();
+    }
+}
+
+uint16_t uart1_rx_frame_take(uint8_t *data, uint16_t capacity)
+{
+    uint32_t primask;
+    uint16_t length;
+    uint8_t slot;
+
+    if ((data == NULL) || (capacity == 0U))
+    {
+        return 0U;
+    }
+
+    primask = __get_PRIMASK();
+    __disable_irq();
+    if (g_uart1_rx_frame_count == 0U)
+    {
+        if (primask == 0U)
+        {
+            __enable_irq();
+        }
+        return 0U;
+    }
+
+    slot = g_uart1_rx_frame_tail;
+    length = g_uart1_rx_frame_lengths[slot];
+    if (length > capacity)
+    {
+        length = capacity;
+    }
+    memcpy(data, g_uart1_rx_frame_queue[slot], length);
+    g_uart1_rx_frame_tail = (uint8_t)((slot + 1U) % UART1_RX_FRAME_QUEUE_DEPTH);
+    g_uart1_rx_frame_count--;
+
+    if (primask == 0U)
+    {
+        __enable_irq();
+    }
+    return length;
+}
 
 HAL_StatusTypeDef dma_uart_receice_data(void)
 {
@@ -256,10 +311,16 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
         {
             SCB_InvalidateDCache_by_Addr((void *)g_uart1_rx_dma_buffer,
                                         UART1_RX_DMA_BUFFER_SIZE);
-            memcpy(g_uart1_rx_frame, g_uart1_rx_dma_buffer, size);
-            g_uart1_rx_frame[size] = '\0';
-            g_uart1_rx_length = size;
-            g_uart1_rx_ready = 1U;
+            if (g_uart1_rx_frame_count < UART1_RX_FRAME_QUEUE_DEPTH)
+            {
+                uint8_t slot = g_uart1_rx_frame_head;
+
+                memcpy(g_uart1_rx_frame_queue[slot], g_uart1_rx_dma_buffer, size);
+                g_uart1_rx_frame_queue[slot][size] = '\0';
+                g_uart1_rx_frame_lengths[slot] = size;
+                g_uart1_rx_frame_head = (uint8_t)((slot + 1U) % UART1_RX_FRAME_QUEUE_DEPTH);
+                g_uart1_rx_frame_count++;
+            }
         }
 
         dma_uart_receice_data();

@@ -102,36 +102,7 @@ static lora_status_t lora_send_packet(lora_packet_type_t type,
  */
 static uint16_t lora_take_uart_frame(uint8_t *data)
 {
-    uint32_t primask;
-    uint16_t length;
-
-    primask = __get_PRIMASK();
-    __disable_irq();
-
-    if (g_uart1_rx_ready == 0U)
-    {
-        if (primask == 0U)
-        {
-            __enable_irq();
-        }
-        return 0U;
-    }
-
-    length = g_uart1_rx_length;
-    if (length > UART1_RX_DMA_BUFFER_SIZE)
-    {
-        length = UART1_RX_DMA_BUFFER_SIZE;
-    }
-    memcpy(data, g_uart1_rx_frame, length);
-    g_uart1_rx_length = 0U;
-    g_uart1_rx_ready = 0U;
-
-    if (primask == 0U)
-    {
-        __enable_irq();
-    }
-
-    return length;
+    return uart1_rx_frame_take(data, UART1_RX_DMA_BUFFER_SIZE);
 }
 
 /**
@@ -148,8 +119,7 @@ lora_status_t lora_init(uint32_t baudrate)
     }
 
     usart_init(baudrate);
-    g_uart1_rx_length = 0U;
-    g_uart1_rx_ready = 0U;
+    uart1_rx_frame_queue_reset();
 
     if (dma_uart_receice_data() != HAL_OK)
     {

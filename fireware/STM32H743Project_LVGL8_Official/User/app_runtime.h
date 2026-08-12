@@ -23,6 +23,8 @@ void app_runtime_ui_start(void);
 /** 在LVGL任务循环中调用：每秒刷新RTC、六个仪表盘和温湿度。 */
 void app_runtime_ui_process(void);
 
+void app_runtime_record_co_sample(float co_ppm);
+
 /** 在LVGL任务循环中调用：分析六路气体数据，判断是否告警。*/
 void app_runtime_analyze(void);
 

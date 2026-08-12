@@ -55,6 +55,7 @@
 #define USART_EN_RX     1                       /*  πƒ‹£®1£©/Ω˚÷π£®0£©¥Æø⁄1Ω” ’ */
 #define RXBUFFERSIZE    1                       /* ª∫¥Ê¥Û–° */
 #define UART1_RX_DMA_BUFFER_SIZE    256U        /* USART1 DMAΩ” ’ª∫≥Â«¯¥Û–° */
+#define UART1_RX_FRAME_QUEUE_DEPTH  4U          /* USART1 DMAΩ” ’÷°∂”¡–…Ó∂» */
 
 extern UART_HandleTypeDef g_uart1_handle;       /* UARTæ‰±˙ */
 
@@ -62,13 +63,12 @@ extern uint8_t  g_usart_rx_buf[USART_REC_LEN];  /* Ω” ’ª∫≥Â,◊Ó¥ÛUSART_REC_LEN∏ˆ◊
 extern uint16_t g_usart_rx_sta;                 /* Ω” ’◊¥Ã¨±Íº« */
 extern uint8_t g_rx_buffer[RXBUFFERSIZE];       /* HALø‚USARTΩ” ’Buffer */
 extern uint8_t g_uart1_rx_dma_buffer[UART1_RX_DMA_BUFFER_SIZE];
-extern uint8_t g_uart1_rx_frame[UART1_RX_DMA_BUFFER_SIZE + 1U];
-extern volatile uint16_t g_uart1_rx_length;
-extern volatile uint8_t g_uart1_rx_ready;
 
 
 void usart_init(uint32_t baudrate);             /* ¥Æø⁄≥ı ºªØ∫Ø ˝ */
 HAL_StatusTypeDef dma_uart_receice_data(void);  /* ∆Ù∂ØUSART1ø’œ–œﬂDMAΩ” ’ */
+void uart1_rx_frame_queue_reset(void);          /* «Âø’USART1 DMAΩ” ’÷°∂”¡– */
+uint16_t uart1_rx_frame_take(uint8_t *data, uint16_t capacity); /* ∞¥Ω” ’À≥–Ú»°≥ˆ“ª÷° */
 
 #endif
 

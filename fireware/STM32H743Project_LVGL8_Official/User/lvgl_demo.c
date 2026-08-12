@@ -10,6 +10,8 @@
 #include "lv_port_indev_template.h"
 #include "LVGL/GUI_APP/lv_mainstart.h"
 #include "app_runtime.h"
+#include "lora_comm.h"
+#include "data_analysis.h"
 
 
 /******************************************************************************************************/
@@ -31,33 +33,6 @@ void start_task(void *pvParameters);    /* 任务函数 */
 TaskHandle_t LV_DEMOTask_Handler;       /* 任务句柄 */
 void lv_demo_task(void *pvParameters);  /* 任务函数 */
 
-/* ALARM_TASK 任务 配置
- * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
- */
-#define ALARM_TASK_PRIO     5           /* 任务优先级 */
-#define ALARM_STK_SIZE      128         /* 任务堆栈大小 */
-TaskHandle_t AlarmTask_Handler;         /* 任务句柄 */
-void alarm_task(void *pvParameters);    /* 任务函数 */
-
-/* ANALYZE_TASK 任务 配置
- * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
- */
-#define ANALYZE_TASK_PRIO   4           /* 任务优先级 */
-#define ANALYZE_STK_SIZE    128         /* 任务堆栈大小 */
-TaskHandle_t AnalyzeTask_Handler;       /* 任务句柄 */
-void analyze_task(void *pvParameters);  /* 任务函数 */
-
-/**
- * RECEIVE_DATA_TASK 任务配置
- * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
- */
-#define RECEIVE_DATA_TASK_PRTO   4      /* 任务优先级 */
-#define RECEIVE_DATA_STK_SIZE    256    /* LoRa协议解析需要较大的局部缓冲区 */
-TaskHandle_t ReceiveTask_Handler;       /* 任务句柄 */
-void receive_data_tack(void *pvParameters); /* 任务函数 */
-
-volatile uint16_t co_value_test = 0;
-volatile uint16_t co2_value_test = 0;
 /******************************************************************************************************/
 
 
@@ -86,6 +61,9 @@ void start_task(void *pvParameters)
 {
     taskENTER_CRITICAL();           /* 进入临界区 */
 
+    lora_task_creat();              /* 创建LoRa通信任务和发送队列 */
+    data_analysis_creat();          /* 创建数据分析和告警任务 */
+
     /* 创建LVGL任务 */
     xTaskCreate((TaskFunction_t )lv_demo_task,
                 (const char*    )"lv_demo_task",
@@ -93,31 +71,6 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )LV_DEMO_TASK_PRIO,
                 (TaskHandle_t*  )&LV_DEMOTask_Handler);
-
-    /* 告警任务 */
-    xTaskCreate((TaskFunction_t )alarm_task,
-                (const char*    )"alarm_task",
-                (uint16_t       )ALARM_STK_SIZE,
-                (void*          )NULL,
-                (UBaseType_t    )ALARM_TASK_PRIO,
-                (TaskHandle_t*  )&AlarmTask_Handler);
-
-    /* 数据分析任务 */
-    xTaskCreate((TaskFunction_t )analyze_task,
-                (const char*    )"analyze_task",
-                (uint16_t       )ANALYZE_STK_SIZE,
-                (void*          )NULL,
-                (UBaseType_t    )ANALYZE_TASK_PRIO,
-                (TaskHandle_t*  )&AnalyzeTask_Handler);
-
-    xTaskCreate((TaskFunction_t )receive_data_tack,
-                (const char*    )"receive_data_task",
-                (uint16_t       )RECEIVE_DATA_STK_SIZE,
-                (void*          )NULL,
-                (UBaseType_t    )RECEIVE_DATA_TASK_PRTO,
-                (TaskHandle_t*  )&ReceiveTask_Handler);
-                
-
     taskEXIT_CRITICAL();            /* 退出临界区 */
     vTaskDelete(StartTask_Handler); /* 删除开始任务 */
 }
@@ -135,119 +88,38 @@ void lv_demo_task(void *pvParameters)
     while(1)
     {
         app_runtime_ui_process();
+        fan_sensor_status_read();
         lv_timer_handler(); /* LVGL计时器 */
         vTaskDelay(5);
     }
 }
 
-/**
- * @brief       告警任务
- * @param       pvParameters : 传入参数(未用到)
- * @retval      无
- */
-void alarm_task(void *pvParameters)
+/* 风扇传感器状态读取 */
+void fan_sensor_status_read(void)
 {
-   while(1)
-   {
-       if(alarm_flag == ALARM_FANG_DANGLE)
-       {
-            LED1(1);
-            LED0(0);
-            app_interface_set_fan_enabled(true);
-            lora_send_byte(FAN_ON, 0x00, 0x04, 0x16);
-            vTaskDelay(100U);
-             
-            app_interface_set_window_open(true);
-            lora_send_byte(SENSER_ON, 0x00, 0x04, 0x16);
+    static int8_t s_last_fan_status = -1;
+    static int8_t s_last_sensor_status = -1;
+    uint8_t fan_status;
+    uint8_t sensor_status;
 
-            
-        }
-       else if(alarm_flag == ALARM_FANG_WORN)
-       {
-            LED0(1);
-            LED1_TOGGLE();
-            app_interface_set_fan_enabled(false);
-            lora_send_byte(FAN_OFF, 0x00, 0x04, 0x16);
-            vTaskDelay(100U);
+    fan_status = app_interface_get_flag(APP_FLAG_FAN_ENABLED) ? 1U : 0U;
+    sensor_status = app_interface_get_flag(APP_FLAG_WINDOW_OPEN) ? 1U : 0U;
 
-            app_interface_set_window_open(true);
-            lora_send_byte(SENSER_ON, 0x00, 0x04, 0x16);
-
-        }
-       else if(alarm_flag == ALARM_FANG_SAFE)
-       {    
-            LED0(1);
-            LED1(0);
-            app_interface_set_fan_enabled(false);
-            lora_send_byte(FAN_OFF, 0x00, 0x04, 0x16);
-            vTaskDelay(100U);
-
-            app_interface_set_window_open(false);
-            lora_send_byte(SENSER_OFF, 0x00, 0x04, 0x16);
-
-        }
-       vTaskDelay(1000);
-   }
-}
-
-void analyze_task(void *pvParameters)
-{
-    while(1)
+    if ((int8_t)fan_status != s_last_fan_status)
     {
-        app_runtime_analyze();
-        vTaskDelay(1000);
+        if (lora_send_comm_byte(fan_status != 0U ? FAN_ON : FAN_OFF,
+                                0x00, 0x04, 0x16) == pdPASS)
+        {
+            s_last_fan_status = (int8_t)fan_status;
+        }
+    }
+
+    if ((int8_t)sensor_status != s_last_sensor_status)
+    {
+        if (lora_send_comm_byte(sensor_status != 0U ? SENSER_ON : SENSER_OFF,
+                                0x00, 0x04, 0x16) == pdPASS)
+        {
+            s_last_sensor_status = (int8_t)sensor_status;
+        }
     }
 }
-
-void receive_data_tack(void *pvParameters)
-{
-    uint8_t num_set_0[5];
-    uint8_t num_set_1[5];
-    while(1)
-    {
-        //co 4 22
-        lora_send_byte(1, 0x00, 0x04, 0x16);
-        uint32_t start = HAL_GetTick();
-        while (HAL_GetTick() - start < 1000U)
-        {
-            uint16_t len = sizeof(num_set_0);
-            if (lora_receive_array(num_set_0, sizeof(num_set_0), &len) == LORA_OK)
-            {
-                if (len == 2U)
-                {
-                    co_value_test = ((uint16_t)num_set_0[0] << 8) | num_set_0[1];
-                }
-                app_interface_set_sensor_connected(APP_SENSOR_CO, true);
-                break;
-            }else{
-                app_interface_set_sensor_connected(APP_SENSOR_CO, false);
-            }
-            vTaskDelay(1U);
-        }
-        vTaskDelay(500U);
-
-        //co2 1 19
-        lora_send_byte(1, 0x00, 0x01, 0x13);
-        uint32_t start_1 = HAL_GetTick();
-        while (HAL_GetTick() - start_1 < 1000U)
-        {
-            uint16_t len = sizeof(num_set_1);
-            if (lora_receive_array(num_set_1, sizeof(num_set_1), &len) == LORA_OK)
-            {
-                if (len == 2U)
-                {
-                    co2_value_test = ((uint16_t)num_set_1[0] << 8) | num_set_1[1];
-                }
-                app_interface_set_sensor_connected(APP_SENSOR_CO2, true);
-                break;
-            }else {
-                app_interface_set_sensor_connected(APP_SENSOR_CO2, false);
-
-            }
-
-            vTaskDelay(1U);
-        }
-        vTaskDelay(500U);
-    }
-}
-

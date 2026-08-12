@@ -54,6 +54,5 @@ int main(void)
     }
     
     lvgl_demo();                                                /* ÔËÐÐFreeRTOSÀý³Ì */
+    return 0;
 }
-
-
